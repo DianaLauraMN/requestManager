@@ -5,6 +5,12 @@ import { ReqStatus } from "../entities/RequestEntity";
 import { AppLogger } from "../utilities/Logger";
 import { ErrorRequestMessage } from "../utilities/ErrorMessage";
 import { getAppError } from "../utilities/Prisma/PrismaErrorValidator";
+import { PaginationRequestDTO } from "../dtos/PaginationRequestDTO"
+import { CreateRequestEntityRequestDto } from "../dtos/CreateRequestEntityRequestDTO";
+import { PaginationResponse } from "../dtos/GetAllRequestsEntitiesResponseDTO";
+import { GetRequestEntityResponseDto } from "../dtos/GetRequestEntityResponseDTO";
+import { UpdateRequestEntityRequestDto } from "../dtos/UpdateRequestEntityRequestDTO";
+import { UpdateRequetsEntityRequestStatusDto } from "../dtos/UpdateRequestEntityReqStatusDTO";
 
 class RequestController {
     private requestService: RequestService;
@@ -19,20 +25,12 @@ class RequestController {
 
     async getAllRequests(req: Request, res: Response) {
         try {
-            let page: number = 1;
-            let limit: number = 5;
-
-            if (req.query.page && req.query.limit) {
-                page = Number(req.query.page);
-                limit = Number(req.query.limit);
-
-                if (page <= 0) page = 1;
-            }
-            const response = await this.requestService.getAllRequests(page, limit);
-            const { data } = response;
+            const paginationRequestDto: PaginationRequestDTO = req.query;
+            const allRequestsResponse: PaginationResponse<GetRequestEntityResponseDto> = await this.requestService.getAllRequests(paginationRequestDto);
+            const { data } = allRequestsResponse;
 
             this.appLogger.log(data.length > 0 ? `Getting ${data.length} requests` : "No requests founded", this.contextName, this.getAllRequests.name)
-            res.status(SuccessStatus.SUCCESS_OK).json(response);
+            res.status(SuccessStatus.SUCCESS_OK).json(allRequestsResponse);
 
         } catch (error) {
             const appError = getAppError(error as Error);
@@ -70,11 +68,11 @@ class RequestController {
 
     async addRequest(req: Request, res: Response) {
         try {
-            const requestData = req.body;
-            const requestCreated = await this.requestService.addRequest(requestData);
+            const requestData: CreateRequestEntityRequestDto = req.body;
+            const requestCreatedDto: GetRequestEntityResponseDto = await this.requestService.addRequest(requestData);
 
             this.appLogger.log(`New Request added`, this.contextName, this.addRequest.name);
-            res.status(SuccessStatus.CREATED).json(requestCreated);
+            res.status(SuccessStatus.CREATED).json(requestCreatedDto);
 
         } catch (error) {
             const appError = getAppError(error as Error);
@@ -86,7 +84,7 @@ class RequestController {
     async updateRequest(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const updatedReqData = req.body;
+            const requestToUpdateDto: UpdateRequestEntityRequestDto = req.body;
 
             if (!id) {
                 this.appLogger.error(ErrorRequestMessage.UPDATING_REQUEST, ErrorStatus.BAD_REQUEST_ERROR, this.contextName, this.updateRequest.name);
@@ -94,10 +92,10 @@ class RequestController {
                 return;
             }
 
-            const requestUpdated = await this.requestService.updateRequest(updatedReqData, id);
+            const requestUpdatedDto = await this.requestService.updateRequest(requestToUpdateDto, id);
 
             this.appLogger.log(`Request updated`, this.contextName, this.updateRequest.name);
-            res.status(SuccessStatus.SUCCESS_OK).json(requestUpdated);
+            res.status(SuccessStatus.SUCCESS_OK).json(requestUpdatedDto);
 
         } catch (error) {
             const appError = getAppError(error as Error);
@@ -109,20 +107,20 @@ class RequestController {
     async updateStatus(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { body: reqStatusData } = req;
+            const reqStatusDataDto: UpdateRequetsEntityRequestStatusDto = req.body;
 
             if (!id) {
                 this.appLogger.error(ErrorRequestMessage.INVALID_ID, ErrorStatus.BAD_REQUEST_ERROR, this.contextName, this.updateStatus.name);
                 res.status(ErrorStatus.BAD_REQUEST_ERROR).json({ message: ErrorRequestMessage.INVALID_ID });
                 return;
             }
-            if (!Object.values(ReqStatus).includes(reqStatusData.status)) {
+            if (!Object.values(ReqStatus).includes(reqStatusDataDto.status)) {
                 this.appLogger.error(ErrorRequestMessage.INVALID_STATUS, ErrorStatus.BAD_REQUEST_ERROR, this.contextName, this.updateRequest.name);
                 res.status(ErrorStatus.BAD_REQUEST_ERROR).json({ message: ErrorRequestMessage.INVALID_STATUS });
                 return;
             }
 
-            const reqUpdated = await this.requestService.updateStatus(id, reqStatusData.status);
+            const reqUpdated: GetRequestEntityResponseDto = await this.requestService.updateStatus(id, reqStatusDataDto);
             this.appLogger.log(`Request status updtated`, this.contextName, this.updateStatus.name);
             res.status(SuccessStatus.SUCCESS_OK).json(reqUpdated);
 

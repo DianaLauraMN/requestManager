@@ -1,3 +1,7 @@
+import { CreateRequestEntityRequestDto } from "../dtos/CreateRequestEntityRequestDTO";
+import { PaginationResponse } from "../dtos/GetAllRequestsEntitiesResponseDTO";
+import { GetRequestEntityResponseDto } from "../dtos/GetRequestEntityResponseDTO";
+import { UpdateRequestEntityRequestDto } from "../dtos/UpdateRequestEntityRequestDTO";
 import { IRequest, ReqStatus } from "../entities/RequestEntity";
 import { PrismaClient } from "../generated/prisma";
 
@@ -24,7 +28,7 @@ class RequestRepository {
         });
     }
 
-    async getAllRequests(skip: number, take: number) {
+    async getAllRequests(skip: number, take: number): Promise<PaginationResponse<GetRequestEntityResponseDto>> {
         const { _all } = await this.getTableCount();
         const data = await prisma.eventRequest.findMany({
             skip: (skip - 1) * take,
@@ -38,15 +42,25 @@ class RequestRepository {
         }
     }
 
-    async getRequest(id: string) {
+    async getRequest(id: string): Promise<GetRequestEntityResponseDto | null> {
         return prisma.eventRequest.findUnique({
             where: {
                 id
+            },
+            select: {
+                id: true,
+                email: true,
+                tel: true,
+                description: true,
+                status: true,
+                deletedAt: true,
+                createdAt: true,
+                updatedAt: true,
             }
         })
     }
 
-    async addRequest(request: IRequest) {
+    async addRequest(request: CreateRequestEntityRequestDto): Promise<GetRequestEntityResponseDto> {
         return prisma.eventRequest.create({
             data: {
                 email: request.email,
@@ -56,20 +70,18 @@ class RequestRepository {
         })
     }
 
-    async updateRequest(updatedRequest: IRequest, id: string) {
+    async updateRequest(updatedRequest: UpdateRequestEntityRequestDto, id: string): Promise<GetRequestEntityResponseDto> {
         return prisma.eventRequest.update({
             where: {
                 id
             },
             data: {
-                email: updatedRequest.email,
-                tel: updatedRequest.tel,
-                description: updatedRequest.description
+                ...updatedRequest
             }
         })
     }
 
-    async updateStatus(id: string, status: ReqStatus) {
+    async updateStatus(id: string, status: ReqStatus): Promise<GetRequestEntityResponseDto> {
         return prisma.eventRequest.update({
             where: {
                 id
