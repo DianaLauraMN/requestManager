@@ -25,7 +25,14 @@ class RequestController {
 
     async getAllRequests(req: Request, res: Response) {
         try {
-            const paginationRequestDto: PaginationRequestDTO = req.query;
+            let defaultPage = 1;
+            let defaultLimit = 5;
+
+            let paginationRequestDto: PaginationRequestDTO = req.query;
+            if (!paginationRequestDto.page || !paginationRequestDto.limit) {
+                paginationRequestDto = { page: defaultPage, limit: defaultLimit };
+            }
+
             const allRequestsResponse: PaginationResponse<GetRequestEntityResponseDto> = await this.requestService.getAllRequests(paginationRequestDto);
             const { data } = allRequestsResponse;
 
@@ -39,29 +46,23 @@ class RequestController {
         }
     }
 
-    async getRequest(req: Request, res: Response) {
+    async getRequestById(req: Request, res: Response) {
         try {
-            const { id } = req.params;
-            if (!id) {
-                this.appLogger.error(ErrorRequestMessage.INVALID_ID, ErrorStatus.BAD_REQUEST_ERROR, this.contextName, this.getRequest.name)
-                res.status(ErrorStatus.BAD_REQUEST_ERROR).json({ message: ErrorRequestMessage.INVALID_ID });
-                return;
-            }
-
+            const { id } = req.params as { id: string };
             const request = await this.requestService.getRequest(id);
 
             if (!request) {
-                this.appLogger.error(ErrorRequestMessage.GETTING_REQUEST_BY_ID, ErrorStatus.NOT_FOUND_ERROR, this.contextName, this.getRequest.name)
+                this.appLogger.error(ErrorRequestMessage.GETTING_REQUEST_BY_ID, ErrorStatus.NOT_FOUND_ERROR, this.contextName, this.getRequestById.name)
                 res.status(ErrorStatus.NOT_FOUND_ERROR).json({ message: ErrorRequestMessage.INVALID_ID });
                 return;
             }
 
-            this.appLogger.log(`Request returned`, this.contextName, this.getRequest.name);
+            this.appLogger.log(`Request returned`, this.contextName, this.getRequestById.name);
             res.status(SuccessStatus.SUCCESS_OK).json(request);
 
         } catch (error) {
             const appError = getAppError(error as Error);
-            this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.getRequest.name);
+            this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.getRequestById.name);
             res.status(Number(appError?.code || ErrorStatus.UNCONTROLLED_ERROR)).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
         }
     }

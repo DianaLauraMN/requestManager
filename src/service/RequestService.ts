@@ -4,7 +4,6 @@ import { GetRequestEntityResponseDto } from "../dtos/GetRequestEntityResponseDTO
 import { PaginationRequestDTO } from "../dtos/PaginationRequestDTO";
 import { UpdateRequetsEntityRequestStatusDto } from "../dtos/UpdateRequestEntityReqStatusDTO";
 import { UpdateRequestEntityRequestDto } from "../dtos/UpdateRequestEntityRequestDTO";
-import { IRequest, ReqStatus } from "../entities/RequestEntity";
 import RequestRepository from "../repository/RequestRepository";
 
 class RequestService {
