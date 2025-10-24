@@ -32,7 +32,7 @@ class RequestController {
             if (!paginationRequestDto.page || !paginationRequestDto.limit) {
                 paginationRequestDto = { page: defaultPage, limit: defaultLimit };
             }
-            
+
             const allRequestsResponse: PaginationResponse<GetRequestEntityResponseDto> = await this.requestService.getAllRequests(paginationRequestDto);
             const { data } = allRequestsResponse;
 
@@ -49,12 +49,6 @@ class RequestController {
     async getRequestById(req: Request, res: Response) {
         try {
             const { id } = req.params as { id: string };
-            // if (!id) {
-            //     this.appLogger.error(ErrorRequestMessage.INVALID_ID, ErrorStatus.BAD_REQUEST_ERROR, this.contextName, this.getRequestById.name)
-            //     res.status(ErrorStatus.BAD_REQUEST_ERROR).json({ message: ErrorRequestMessage.INVALID_ID });
-            //     return;
-            // }
-
             const request = await this.requestService.getRequest(id);
 
             if (!request) {

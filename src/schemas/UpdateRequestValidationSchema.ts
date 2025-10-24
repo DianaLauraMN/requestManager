@@ -14,8 +14,6 @@ const UpdateEntityValidationSchema = RequestEntityValidationSchema.partial().ref
 
 export const validateUpdateRequestEntityPipe = (req: Request, res: Response, next: NextFunction) => {
     const updateRequestEntityDTO: UpdateRequestEntityRequestDto = req.body;
-    console.log(updateRequestEntityDTO);
-
     try {
         UpdateEntityValidationSchema.parse(updateRequestEntityDTO);
     } catch (error) {
