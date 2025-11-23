@@ -60,38 +60,43 @@ model EventRequest {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  tel       String     @unique
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  deletedAt DateTime?
-  role      UserRole
-  requestId String     @default(uuid())
+  id           String       @id @default(uuid())
+  email        String       @unique
+  tel          String       @unique
+  status       UserStatus   @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+  role         UserRole
+  requestId    String       @default(uuid())
+  password     String?      @db.VarChar(255)
+  profile      Profile?
+  eventDetails EventDetail?
 }
 
 model Profile {
-  id        Int     @id
-  fristName String
-  lastName  String
-  country   String
-  city      String
-  gender    Genders
-  age       Int
-  userId    String  @default(uuid())
+  id        Int      @id @default(autoincrement())
+  firstName String?
+  lastName  String?
+  country   String?
+  city      String?
+  gender    Genders?
+  age       Int?
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
 }
 
-model Event {
-  id             Int       @id
+model EventDetail {
+  id             Int        @id @default(autoincrement())
   guestsQuantity Int
   eventType      EventType
   eventName      String
-  eventDate      DateTime  @unique
-  startTime      DateTime
-  endTime        DateTime
-  tableType      TableType
-  children       Boolean
-  alcohol        Boolean
-  userId         String    @default(uuid())
+  eventDate      DateTime   @unique @db.Date
+  startTime      DateTime?  
+  endTime        DateTime? 
+  tableType      TableType?
+  children       Boolean?
+  alcohol        Boolean?
+  userId         String     @unique
+  user           User       @relation(fields: [userId], references: [id])
 }

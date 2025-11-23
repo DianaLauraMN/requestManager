@@ -10,13 +10,16 @@ import { ErrorRequestMessage } from "../utilities/ErrorMessage";
 import { AppLogger } from "../utilities/Logger";
 import { AppError } from "../utilities/Prisma/PrismaErrorValidator";
 import { ErrorStatus } from "../utilities/StatusCode";
+import UserService from "./UserService";
 
 class RequestService {
     private requestRepository: RequestRepository = RequestRepository.getInstance();
+    private userService: UserService;
     private appLogger: AppLogger;
 
     constructor() {
         this.appLogger = new AppLogger();
+        this.userService = new UserService();
 
     }
     async getAllRequests(paginationDto: PaginationRequestDTO): Promise<PaginationResponse<GetRequestEntityResponseDto>> {
@@ -75,6 +78,9 @@ class RequestService {
         if (!updatedStatus) {
             this.appLogger.error(ErrorRequestMessage.UPDATING_REQUEST, ErrorStatus.BAD_REQUEST_ERROR, RequestService.name, this.updateStatus.name);
             throw new AppError(ErrorRequestMessage.UPDATING_REQUEST, ErrorStatus.BAD_REQUEST_ERROR);
+        }
+        if (updatedStatus.status === 'ACCEPTED') {
+            await this.userService.addUser(updatedStatus.id, updatedStatus.email, updatedStatus.tel);
         }
         this.appLogger.log(`Request status updated`, RequestService.name, this.updateStatus.name);
         return updatedStatus;
