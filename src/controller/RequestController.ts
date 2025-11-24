@@ -30,7 +30,7 @@ class RequestController {
         } catch (error) {
             const appError = getAppError(error as Error);
             this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.getAllRequests.name)
-            res.status(ErrorStatus.BAD_REQUEST_ERROR).json({ message: ErrorRequestMessage.GETTING_ALL_REQUESTS })
+            res.status(Number(appError?.code) || ErrorStatus.UNCONTROLLED_ERROR).json({ message: appError?.message || ErrorRequestMessage.GETTING_ALL_REQUESTS });
         }
     }
 
@@ -42,7 +42,7 @@ class RequestController {
         } catch (error) {
             const appError = getAppError(error as Error);
             this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.getRequestById.name);
-            res.status(Number(appError?.code || ErrorStatus.UNCONTROLLED_ERROR)).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
+            res.status(Number(appError?.code) || ErrorStatus.UNCONTROLLED_ERROR).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
         }
     }
 
@@ -54,7 +54,7 @@ class RequestController {
         } catch (error) {
             const appError = getAppError(error as Error);
             this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.addRequest.name);
-            res.status(Number(appError?.code || ErrorStatus.UNCONTROLLED_ERROR)).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE })
+            res.status(Number(appError?.code) || ErrorStatus.UNCONTROLLED_ERROR).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE })
         }
     }
 
@@ -67,7 +67,7 @@ class RequestController {
         } catch (error) {
             const appError = getAppError(error as Error);
             this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.updateRequest.name);
-            res.status(Number(appError?.code || ErrorStatus.UNCONTROLLED_ERROR)).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
+            res.status(Number(appError?.code) || ErrorStatus.UNCONTROLLED_ERROR).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
         }
     }
 
@@ -80,7 +80,7 @@ class RequestController {
         } catch (error) {
             const appError = getAppError(error as Error);
             this.appLogger.error(appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE, appError?.code || ErrorStatus.UNCONTROLLED_ERROR, this.contextName, this.updateStatus.name);
-            res.status(Number(appError?.code || ErrorStatus.UNCONTROLLED_ERROR)).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
+            res.status(Number(appError?.code) || ErrorStatus.UNCONTROLLED_ERROR).json({ message: appError?.message || ErrorRequestMessage.GENERIC_ERROR_MESSAGE });
         }
     }
 }
